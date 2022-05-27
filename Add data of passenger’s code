@@ -1,0 +1,27 @@
+Dim n As Long
+   Dim x As Long
+   n = Cells(Rows.count, "A").End(xlUp).Row + 1
+   x = Cells(n - 1, "A").Value
+   If Not IsNumeric(Interarrival_Time_Textbox.Value) Or IsNumeric(Service_Time_Textbox.Value) Or IsNumeric(Walk_Time_Textbox.Value) Then
+    MsgBox "Only Numbers Are Allowed"
+    Else
+    
+    
+            If Interarrival_Time_Textbox.Value = "" Or Service_Time_Textbox.Value = "" Or Walk_Time_Textbox.Value = "" Then
+                  MsgBox "Please enter a value for the blank textbox"
+                  Exit Sub
+             Else
+                 Cells(n, "A").Value = x + 1
+                 Cells(n, "B").Value = Interarrival_Time_Textbox.Value
+                 Cells(n, "C").Value = Service_Time_Textbox.Value
+                 Cells(n, "D").Value = Walk_Time_Textbox.Value
+                 Cells(n, "A").HorizontalAlignment = xlCenter
+                 Cells(n, "B").HorizontalAlignment = xlCenter
+                 Cells(n, "C").HorizontalAlignment = xlCenter
+                 Cells(n, "D").HorizontalAlignment = xlCenter
+             End If
+    End If
+    
+    Interarrival_Time_Textbox.Value = ""
+    Service_Time_Textbox.Value = ""
+    Walk_Time_Textbox.Value = ""
