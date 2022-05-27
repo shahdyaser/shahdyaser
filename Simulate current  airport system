@@ -1,0 +1,434 @@
+Dim n As Long
+    Dim r As Long
+    Dim w As Long
+    Dim i As Long
+    Dim s() As Variant
+    Dim k() As Variant
+    Dim d1 As String
+    Dim d2 As String
+    Dim d3 As String
+    Dim d1p1 As Double
+    Dim d1p2 As Double
+    Dim d1p3 As Double
+    Dim d2p1 As Double
+    Dim d2p2 As Double
+    Dim d2p3 As Double
+    Dim d3p1 As Double
+    Dim d3p2 As Double
+    Dim d3p3 As Double
+    'get the value from the textboxes
+    d1 = Interarrival_Time_Combobox.Value
+    d2 = Service_Time_Combobox.Value
+    d3 = Walk_Time_Combobox.Value
+    n = Simulation_Runs_Textbox.Value
+    Results_Form.Hidden_Label_1.Caption = n
+    r = Simulation_Length_Textbox.Value
+    r = r + 6
+    Results_Form.Hidden_Label_2.Caption = r
+    w = Simulation_Length_Warmup_Textbox.Value
+    Results_Form.Hidden_Label_3.Caption = w
+    'add a sheet and chanige its column parts
+    For i = 1 To n
+    ' make a new sheet for each simulation run
+    Sheets.add.Name = "Simulation  " & i
+     With Range("A1:AI4")
+            .Merge
+            .HorizontalAlignment = xlCenter
+            .VerticalAlignment = xlCenter
+            .Value = "Simulation  " & i
+            .Font.Size = 24
+            .Font.Bold = True
+        End With
+    ' make the couomns for each simulation run
+    s = Array("# of passenger", "Day", "Shift", "Arrival time", "InterArrival Time", "Wait Time", "Queue Length" _
+    , "Start Service Time", "Service Time", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C1 Busy?" _
+    , "C2 Busy?", "C3 Busy?", "C4 Busy?", "C5 Busy?", "C6 Busy?", "C7 Busy?", "C8 Busy?", "C9 Busy?", "C10 Busy?" _
+    , "Passenger Type", "Walk Time", "Carry-On luggage", "Arrival Time at Gate", "Time spent in system" _
+    , "Passengers in system")
+    k = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T" _
+    , "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI")
+    
+    For l = 0 To 34
+     With Range(k(l) & 6)
+        .Value = s(l)
+        .Font.Size = 12
+        .Font.Bold = True
+        .Interior.Color = RGB(255, 185, 156)
+        End With
+    Next l
+    With Range("A7")
+    'make automatic counter for rows
+        .Value = 1
+        .AutoFill Destination:=Range("A7:A" & r), Type:=xlFillSeries
+    End With
+    'do the ditributions for excel
+        If d1 = "Uniform" Then
+            d1p1 = Parameter_A1_Textbox.Value
+            d1p2 = Parameter_A2_Textbox.Value
+            With Range("E7:E" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("E7:E" & r), _
+        , , 1, , d1p1, d1p2
+            End With
+        End If
+           If d1 = "Normal" Then
+            d1p1 = Parameter_A1_Textbox.Value
+            d1p2 = Parameter_A2_Textbox.Value
+            With Range("E7:E" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("E7:E" & r), _
+        , , 2, , d1p1, d1p2
+            End With
+        End If
+                If d1 = "Poisson" Then
+            d1p1 = Parameter_A1_Textbox.Value
+            With Range("E7:E" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("E7:E" & r), _
+        , , 5, , d1p1
+            End With
+        End If
+        If d1 = "Triangular" Then
+        d1p1 = Parameter_A1_Textbox.Value
+        d1p2 = Parameter_A2_Textbox.Value
+        d1p3 = Parameter_A3_Textbox.Value
+        LowerRange = d1p2 - d1p1
+        HigherRange = d1p3 - d1p2
+        TotalRange = d1p3 - d1p1
+        For rt = 7 To r
+        CumulativeProb = Rnd()
+        If CumulativeProb < (LowerRange / TotalRange) Then
+            Range("E" & rt) = d1p1 + Sqr(CumulativeProb * LowerRange * TotalRange)
+        Else
+            Range("E" & rt) = d1p3 - Sqr((1 - CumulativeProb) * HigherRange * TotalRange)
+        End If
+        Next rt
+        End If
+        If d1 = "Lognormal" Then
+        d1p1 = Parameter_A1_Textbox.Value
+        d1p2 = Parameter_A2_Textbox.Value
+
+        For rt = 7 To r
+            Range("E" & rt).Value = WorksheetFunction.LogNorm_Inv(Rnd(), d1p1, d1p2)
+         Next rt
+        End If
+         If d1 = "Gamma" Then
+        d1p1 = Parameter_A1_Textbox.Value
+        d1p2 = Parameter_A2_Textbox.Value
+
+        For rt = 7 To r
+            Range("E" & rt).Value = WorksheetFunction.Gamma_Inv(Rnd(), d1p2, d1p1)
+         Next rt
+        End If
+        If d1 = "Exponential" Then
+            d1p1 = Parameter_A1_Textbox.Value
+            For re = 7 To r
+        CumulativeProb = Rnd()
+        Range("E" & re) = -d1p1 * Log(CumulativeProb)
+        Next re
+        End If
+        If d2 = "Uniform" Then
+            d1p2 = Parameter_B1_Textbox.Value
+            d1p2 = Parameter_B2_Textbox.Value
+            With Range("I7:I" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("I7:I" & r), _
+        , , 1, , d2p1, d2p2
+            End With
+        End If
+           If d2 = "Normal" Then
+            d2p1 = Parameter_B1_Textbox.Value
+            d2p2 = Parameter_B2_Textbox.Value
+            With Range("I7:I" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("I7:I" & r), _
+        , , 2, , d2p1, d2p2
+            End With
+        End If
+                If d2 = "Poisson" Then
+            d2p1 = Parameter_B1_Textbox.Value
+            With Range("I7:I" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("I7:I" & r), _
+        , , 5, , d2p1
+            End With
+        End If
+        If d2 = "Triangular" Then
+        d2p1 = Parameter_B1_Textbox.Value
+        d2p2 = Parameter_B2_Textbox.Value
+        d2p3 = Parameter_B3_Textbox.Value
+        LowerRange = d2p2 - d2p1
+        HigherRange = d2p3 - d2p2
+        TotalRange = d2p3 - d2p1
+        For rtD2 = 7 To r
+        CumulativeProb = Rnd()
+        If CumulativeProb < (LowerRange / TotalRange) Then
+            Range("I" & rtD2) = d2p1 + Sqr(CumulativeProb * LowerRange * TotalRange)
+        Else
+            Range("I" & rtD2) = d2p3 - Sqr((1 - CumulativeProb) * HigherRange * TotalRange)
+        End If
+        Next rtD2
+        End If
+                If d2 = "Lognormal" Then
+        d2p1 = Parameter_A1_Textbox.Value
+        d2p2 = Parameter_A2_Textbox.Value
+
+        For rtD2 = 7 To r
+            Range("I" & rt).Value = WorksheetFunction.LogNorm_Inv(Rnd(), d2p1, d2p2)
+         Next rtD2
+         End If
+         If d2 = "Gamma" Then
+         For rtD2 = 7 To r
+            Range("I" & rt).Value = WorksheetFunction.Gamma_Inv(Rnd(), d2p2, d2p1)
+         Next rtD2
+        End If
+        If d2 = "Exponential" Then
+            d2p1 = Parameter_B1_Textbox.Value
+            For reD2 = 7 To r
+        CumulativeProb = Rnd()
+        Range("I" & reD2) = -d2p1 * Log(CumulativeProb)
+        Next reD2
+        End If
+                If d3 = "Uniform" Then
+            d3p1 = Parameter_C1_Textbox.Value
+            d3p2 = Parameter_C2_Textbox.Value
+            With Range("AE7:AE" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("AE7:AE" & r), _
+        , , 1, , d3p1, d3p2
+            End With
+        End If
+           If d3 = "Normal" Then
+            d3p1 = Parameter_C1_Textbox.Value
+            d3p2 = Parameter_C2_Textbox.Value
+            With Range("AE7:AE" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("AE7:AE" & r), _
+        , , 2, , d3p1, d3p2
+            End With
+        End If
+                If d3 = "Poisson" Then
+            d3p1 = Parameter_C1_Textbox.Value
+            With Range("AE7:AE" & r)
+                Application.Run "ATPVBAEN.XLAM!Random", ActiveSheet.Range("AE7:AE" & r), _
+        , , 5, , d3p1
+            End With
+        End If
+        If d3 = "Triangular" Then
+        d3p1 = Parameter_C1_Textbox.Value
+        d3p2 = Parameter_C2_Textbox.Value
+        d3p3 = Parameter_C3_Textbox.Value
+        LowerRange = d3p2 - d3p1
+        HigherRange = d3p3 - d3p2
+        TotalRange = d3p3 - d3p1
+        For rtD3 = 7 To r
+        CumulativeProb = Rnd()
+        If CumulativeProb < (LowerRange / TotalRange) Then
+            Range("AE" & rtD3) = d2p1 + Sqr(CumulativeProb * LowerRange * TotalRange)
+        Else
+            Range("AE" & rtD3) = d2p3 - Sqr((1 - CumulativeProb) * HigherRange * TotalRange)
+        End If
+        Next rtD3
+        End If
+         If d3 = "Lognormal" Then
+        d3p1 = Parameter_A1_Textbox.Value
+        d3p2 = Parameter_A2_Textbox.Value
+
+        For rtD3 = 7 To r
+            Range("AE" & rt).Value = WorksheetFunction.LogNorm_Inv(Rnd(), d3p1, d3p2)
+         Next rtD3
+         End If
+          If d3 = "Gamma" Then
+         For rtD3 = 7 To r
+            Range("AE" & rt).Value = WorksheetFunction.Gamma_Inv(Rnd(), d3p2, d3p1)
+         Next rtD3
+        End If
+        If d3 = "Exponential" Then
+            d3p1 = Parameter_C1_Textbox.Value
+            For reD3 = 7 To r
+        CumulativeProb = Rnd()
+        Range("AE" & reD3) = -d2p1 * Log(CumulativeProb)
+        Next reD3
+        End If
+        'first row in in the simulation
+        Range("D7").Value = 0
+        Range("G7").Value = 0
+        Range("B7").Value = 1
+        Range("C7").Value = "Morning"
+        Range("H7").Value = 0
+        Range("J7").Value = Range("H7").Value + Range("I7").Value
+        Range("K7:AC7").Value = 0
+        Range("T7").Value = 1
+        Range("AI7").Value = 1
+        Range("F7").Value = 0
+        If Range("I7").Value <= 5 Then
+                Range("AD7").Value = "With No Luggage"
+                Else
+                Range("AD7").Value = "With Luggage"
+                End If
+                
+        ' make the pessenger go to the lowest queue
+        For st = 8 To r
+            Range("D" & st).FormulaR1C1 = "=R[-1]C+R[-1]C[1]"
+            Range("B" & st) = Range("B" & st - 1).Value
+            Range("H" & st).FormulaR1C1 = "=MIN(R[-1]C[2]:R[-1]C[11])"
+            v = Range("H" & st)
+            Range("H" & st).Value = Application.Max(v, Range("D" & st).Value)
+            If Range("J" & st - 1).Value = v Then
+            Range("J" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("K" & st, "S" & st).Value = Range("K" & st - 1, "S" & st - 1).Value
+            ElseIf Range("K" & st - 1).Value = v Then
+            Range("K" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("J" & st).Value = Range("J" & st - 1).Value
+            Range("L" & st, "S" & st).Value = Range("L" & st - 1, "S" & st - 1).Value
+            ElseIf Range("L" & st - 1).Value = v Then
+            Range("L" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("M" & st, "S" & st).Value = Range("M" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "K" & st).Value = Range("J" & st - 1, "K" & st - 1).Value
+            ElseIf Range("M" & st - 1).Value = v Then
+            Range("M" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("N" & st, "S" & st).Value = Range("N" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "L" & st).Value = Range("J" & st - 1, "L" & st - 1).Value
+            ElseIf Range("N" & st - 1).Value = v Then
+            Range("N" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("O" & st, "S" & st).Value = Range("O" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "M" & st).Value = Range("J" & st - 1, "M" & st - 1).Value
+            ElseIf Range("O" & st - 1).Value = v Then
+            Range("O" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("P" & st, "S" & st).Value = Range("P" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "N" & st).Value = Range("J" & st - 1, "N" & st - 1).Value
+            ElseIf Range("P" & st - 1).Value = v Then
+            Range("P" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("Q" & st, "S" & st).Value = Range("Q" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "O" & st).Value = Range("J" & st - 1, "O" & st - 1).Value
+            ElseIf Range("Q" & st - 1).Value = v Then
+            Range("Q" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("R" & st, "S" & st).Value = Range("R" & st - 1, "S" & st - 1).Value
+            Range("J" & st, "P" & st).Value = Range("J" & st - 1, "P" & st - 1).Value
+            ElseIf Range("R" & st - 1).Value = v Then
+            Range("R" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("S" & st).Value = Range("S" & st - 1).Value
+            Range("J" & st, "Q" & st).Value = Range("J" & st - 1, "Q" & st - 1).Value
+            Else
+            Range("S" & st).Value = Range("I" & st).Value + Range("H" & st).Value
+            Range("J" & st, "R" & st).Value = Range("J" & st - 1, "R" & st - 1).Value
+            End If
+                
+            If Range("D" & st).Value > 1440 Then
+                Range("D" & st).Value = Range("D" & st).Value - 1440
+                Range("B" & st).Value = Range("B" & st - 1).Value + 1
+                Range("H" & st).Value = Range("H" & st).Value - 1
+                Range("J" & st).Value = Range("J" & st).Value - 1440
+                Range("K" & st).Value = Range("K" & st).Value - 1440
+                Range("L" & st).Value = Range("L" & st).Value - 1440
+                Range("M" & st).Value = Range("M" & st).Value - 1440
+                Range("N" & st).Value = Range("N" & st).Value - 1440
+                Range("O" & st).Value = Range("O" & st).Value - 1440
+                Range("P" & st).Value = Range("P" & st).Value - 1440
+                Range("Q" & st).Value = Range("Q" & st).Value - 1440
+                Range("R" & st).Value = Range("R" & st).Value - 1440
+                Range("S" & st).Value = Range("S" & st).Value - 1440
+                Range("F" & st).Value = Range("F" & st).Value - 1440
+                End If
+                Range("F" & st).Value = Range("H" & st).Value - Range("D" & st).Value
+                Range("AG" & st).Value = Range("H" & st).Value + Range("I" & st).Value + Range("AE" & st).Value
+            If Range("D" & st).Value < 480 Then
+                Range("C" & st).Value = "Morning"
+            ElseIf Range("D" & st).Value >= 480 And Range("D" & st).Value < 960 Then
+                Range("C" & st).Value = "Afternoon"
+            Else
+                Range("C" & st).Value = "Night"
+            End If
+                If Range("J" & st).Value > Range("J" & st - 1).Value Or Range("J" & st - 1).Value > Range("D" & st).Value Then
+                    Range("T" & st).Value = 1
+                End If
+                If Range("K" & st).Value > Range("K" & st - 1).Value Or Range("K" & st - 1).Value > Range("D" & st).Value Then
+                    Range("U" & st).Value = 1
+                End If
+                If Range("L" & st).Value > Range("L" & st - 1).Value Or Range("L" & st - 1).Value > Range("D" & st).Value Then
+                    Range("V" & st).Value = 1
+                End If
+                If Range("M" & st).Value > Range("M" & st - 1).Value Or Range("M" & st - 1).Value > Range("D" & st).Value Then
+                    Range("W" & st).Value = 1
+                End If
+                If Range("N" & st).Value > Range("N" & st - 1).Value Or Range("N" & st - 1).Value > Range("D" & st).Value Then
+                    Range("X" & st).Value = 1
+                End If
+                If Range("O" & st).Value > Range("O" & st - 1).Value Or Range("O" & st - 1).Value > Range("D" & st).Value Then
+                    Range("Y" & st).Value = 1
+                End If
+                If Range("P" & st).Value > Range("P" & st - 1).Value Or Range("P" & st - 1).Value > Range("D" & st).Value Then
+                    Range("Z" & st).Value = 1
+                End If
+                If Range("Q" & st).Value > Range("Q" & st - 1).Value Or Range("Q" & st - 1).Value > Range("D" & st).Value Then
+                    Range("AA" & st).Value = 1
+                End If
+                If Range("R" & st).Value > Range("R" & st - 1).Value Or Range("R" & st - 1).Value > Range("D" & st).Value Then
+                    Range("AB" & st).Value = 1
+                End If
+                If Range("S" & st).Value > Range("S" & st - 1).Value Or Range("S" & st - 1).Value > Range("D" & st).Value Then
+                    Range("AC" & st).Value = 1
+                End If
+              If Range("I" & st).Value <= 2 Then
+                Range("AD" & st).Value = "With No Luggage"
+                Else
+                Range("AD" & st).Value = "With Luggage"
+                End If
+              Range("AH" & st).Value = Range("AG" & st).Value - Range("D" & st).Value
+            g = Int(12 * Rnd + 1)
+               If g = 1 And Range("AE" & st).Value < 5 Then
+                Range("AF" & st).Value = "With Carry on"
+                End If
+                If g = 1 And Range("AE" & st).Value < 5 Then
+                    Range("AF" & st).Value = "No Carry on"
+
+
+
+                    End If
+                If g = 2 And Range("AE" & st).Value < 5 Then
+                    Range("AF" & st).Value = "No Carry on"
+                    End If
+                If g = 3 And Range("AE" & st).Value < 10 Then
+                    Range("AF" & st).Value = "No Carry on"
+                    End If
+                If g = 4 And Range("AE" & st).Value < 10 Then
+                    Range("AF" & st).Value = "No Carry on"
+                    End If
+                If g = 5 And Range("AE" & st).Value < 15 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 6 And Range("AE" & st).Value < 15 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 7 And Range("AE" & st).Value < 20 Then
+                     Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 8 And Range("AE" & st).Value < 20 Then
+                     Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 9 And Range("AE" & st).Value < 25 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 10 And Range("AE" & st).Value < 25 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 11 And Range("AE" & st).Value < 30 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+                If g = 12 And Range("AE" & st).Value < 30 Then
+                    Range("AF" & st).Value = "No Carry on"
+                End If
+            ql = Range("D" & st).Value
+               q = Application.CountIf(Range("H7:H" & st - 1), "<" & ql)
+               Range("G" & st).Value = Range("A" & st).Value - q - 1
+            Range("AI" & st).Value = Range("G" & st).Value + Application.Sum(Range("T" & st & ":AC" & st))
+            
+        Next st
+        Range("AF7").Value = "With Carry on"
+        Range("AG7").Value = Range("AE7").Value + Range("H7").Value + Range("I7").Value
+        Range("AH7").Value = Range("AG7").Value - Range("D7").Value
+        For Each cell In Range("T8:AC" & r)
+        If IsEmpty(cell) Then
+        cell.Value = 0
+        End If
+        Next cell
+        For Each cell In Range("AF8:AF" & r)
+        If IsEmpty(cell) Then
+        cell.Value = "With Carry on"
+        End If
+        Next cell
+        Range("A:AI").EntireColumn.AutoFit
+    Next i
+
