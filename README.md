@@ -1,8 +1,6 @@
-- 👋 Hi, I’m @shahdyaser
-- 👀 I’m interested in data analysis and product planning. 
-- 🌱 I’m currently learning data analysis and product managment. 
-- 💞️ I’m looking to collaborate on UI/UX research projects 
-- 📫 if interested you can send me on s.nasromar@gmail.com
+Product Manager with experience building B2B SaaS products for manufacturing operations. Delivered worker-facing applications, predictive analytics, performance dashboards, and incentive tools, with measurable improvements in customer satisfaction, adoption, productivity, and subscription sales. Combines product management expertise with a technical background in data analysis, databases, and industrial engineering.
+
+
 
 <!---
 shahdyaser/shahdyaser is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
